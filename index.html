@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SK EARN</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #080d1a;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  background: #111c32;
+  text-align: center;
+  padding: 22px;
+  border-bottom: 2px solid #00e5a0;
+}
+
+header h1 {
+  color: #00e5a0;
+  margin: 0;
+  font-size: 32px;
+}
+
+header p {
+  color: #aebbd0;
+}
+
+main {
+  max-width: 480px;
+  margin: auto;
+  padding: 16px;
+}
+
+.card {
+  background: #121d33;
+  border: 1px solid #263653;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+h2 {
+  font-size: 20px;
+}
+
+.muted {
+  color: #aebbd0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+input {
+  width: 100%;
+  padding: 13px;
+  margin: 8px 0;
+  border-radius: 9px;
+  border: 1px solid #344563;
+  background: #080d1a;
+  color: white;
+  font-size: 16px;
+}
+
+button {
+  width: 100%;
+  padding: 13px;
+  margin-top: 8px;
+  border: none;
+  border-radius: 9px;
+  background: #00e5a0;
+  color: #06180f;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.secondary {
+  background: #263653;
+  color: white;
+}
+
+.coins {
+  font-size: 44px;
+  color: #00e5a0;
+  font-weight: bold;
+  text-align: center;
+}
+
+.balance {
+  text-align: center;
+}
+
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+}
+
+.notice {
+  color: #ffd166;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.stat {
+  background: #1b2942;
+  padding: 16px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.stat strong {
+  display: block;
+  color: #00e5a0;
+  font-size: 24px;
+  margin-bottom: 6px;
+}
+
+nav {
+  position: sticky;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: #111c32;
+  padding: 8px 4px;
+  gap: 3px;
+}
+
+nav button {
+  background: transparent;
+  color: white;
+  font-size: 12px;
+  padding: 10px 2px;
+  margin: 0;
+}
+
+footer {
+  text-align: center;
+  color: #8290a8;
+  padding: 20px;
+  font-size: 12px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>⚡ SK EARN</h1>
+  <p>कमवा • बक्षिसे • प्रगती</p>
+</header>
+
+<main>
+
+<section id="loginPage" class="card">
+  <h2>📱 SK EARN मध्ये स्वागत!</h2>
+
+  <p class="muted">
+    आपला मोबाइल नंबर टाका.
+    ही डेमो लॉगिन स्क्रीन आहे.
+  </p>
+
+  <label for="phone">मोबाइल नंबर</label>
+  <input
+    id="phone"
+    type="tel"
+    placeholder="+91XXXXXXXXXX"
+    autocomplete="tel"
+  >
+
+  <button onclick="demoLogin()">Login करा</button>
+
+  <p id="loginMessage" class="notice"></p>
+</section>
+
+<section id="dashboard" class="page">
+
+  <div class="card balance">
+    <h2>💰 तुमचे Coins</h2>
+
+    <div class="coins" id="coins">0</div>
+
+    <p class="muted">
+      डेमो बॅलन्स: ₹0
+    </p>
+  </div>
+
+  <div class="grid">
+    <div class="stat">
+      <strong id="totalEarned">0</strong>
+      <span class="muted">एकूण Coins</span>
+    </div>
+
+    <div class="stat">
+      <strong id="taskCount">0</strong>
+      <span class="muted">पूर्ण Tasks</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🎯 Rewards</h2>
+
+    <p class="muted">
+      येथे पुढे Tasks आणि Rewards ची सुविधा जोडता येईल.
+    </p>
+
+    <button onclick="showPage('tasks')">
+      Tasks पहा
+    </button>
+  </div>
+
+</section>
+
+<section id="tasks" class="page">
+  <div class="card">
+    <h2>🎯 Tasks</h2>
+
+    <p class="muted">
+      Tasks आणि Rewards अजून जोडलेले नाहीत.
+    </p>
+
+    <p class="notice">
+      ही डेमो वेबसाइट आहे. येथे प्रत्यक्ष Coins मिळत नाहीत.
+    </p>
+  </div>
+</section>
+
+<section id="withdraw" class="page">
+  <div class="card">
+    <h2>🏦 पैसे काढा</h2>
+
+    <p class="muted">
+      ही फक्त डेमो स्क्रीन आहे.
+      कोणतेही पेमेंट केले जात नाही.
+    </p>
+
+    <label for="upi">UPI ID</label>
+    <input
+      id="upi"
+      type="text"
+      placeholder="example@upi"
+      autocomplete="off"
+    >
+
+    <button onclick="demoWithdraw()">
+      Withdraw Request
+    </button>
+
+    <p id="withdrawMessage" class="notice"></p>
+  </div>
+</section>
+
+<section id="profile" class="page">
+  <div class="card">
+    <h2>👤 माझे प्रोफाइल</h2>
+
+    <p id="profilePhone" class="muted">
+      लॉगिन केलेले नाही
+    </p>
+
+    <p class="muted">Account: Demo</p>
+
+    <button class="secondary" onclick="logout()">
+      Logout
+    </button>
+  </div>
+</section>
+
+<div class="card">
+  <h2>🔐 महत्त्वाची माहिती</h2>
+
+  <p class="muted">
+    ही SK EARN ची फ्रंटएंड डेमो वेबसाइट आहे.
+    Firebase OTP, सुरक्षित Backend, जाहिराती
+    आणि प्रत्यक्ष पेमेंट अजून जोडलेले नाही.
+  </p>
+</div>
+
+</main>
+
+<nav>
+  <button onclick="showPage('dashboard')">
+    🏠<br>Home
+  </button>
+
+  <button onclick="showPage('tasks')">
+    🎯<br>Tasks
+  </button>
+
+  <button onclick="showPage('withdraw')">
+    💸<br>Withdraw
+  </button>
+
+  <button onclick="showPage('profile')">
+    👤<br>Profile
+  </button>
+</nav>
+
+<footer>
+  © 2026 SK EARN
+</footer>
+
+<script>
+let signedIn = false;
+
+function demoLogin() {
+  const phone = document.getElementById("phone").value.trim();
+  const msg = document.getElementById("loginMessage");
+
+  if (!/^\+[1-9]\d{7,14}$/.test(phone)) {
+    msg.textContent =
+      "कृपया +91XXXXXXXXXX या स्वरूपात नंबर लिहा.";
+    return;
+  }
+
+  signedIn = true;
+
+  document.getElementById("profilePhone").textContent = phone;
+  document.getElementById("loginPage").style.display = "none";
+
+  alert("हा Demo आहे. प्रत्यक्ष OTP पाठवलेला नाही.");
+
+  showPage("dashboard");
+}
+
+function showPage(id) {
+  if (!signedIn) {
+    document.getElementById("loginPage").style.display = "block";
+    document.getElementById("loginMessage").textContent =
+      "आधी Demo Login करा.";
+    return;
+  }
+
+  document.querySelectorAll(".page").forEach(function(page) {
+    page.classList.remove("active");
+  });
+
+  document.getElementById(id).classList.add("active");
+}
+
+function demoWithdraw() {
+  document.getElementById("withdrawMessage").textContent =
+    "Demo: कोणतेही पेमेंट किंवा विनंती पाठवलेली नाही.";
+}
+
+function logout() {
+  signedIn = false;
+
+  document.querySelectorAll(".page").forEach(function(page) {
+    page.classList.remove("active");
+  });
+
+  document.getElementById("loginPage").style.display = "block";
+  document.getElementById("phone").value = "";
+  document.getElementById("profilePhone").textContent =
+    "लॉगिन केलेले नाही";
+  document.getElementById("loginMessage").textContent = "";
+}
+</script>
+
+</body>
+    </html>
