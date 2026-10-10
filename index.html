@@ -1,378 +1,235 @@
+
 <!DOCTYPE html>
 <html lang="mr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SK EARN</title>
-
 <style>
-* {
-  box-sizing: border-box;
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:Arial,sans-serif;
+  background:#0b1020;color:white;
+  min-height:100vh;padding:20px;
 }
-
-body {
-  margin: 0;
-  background: #080d1a;
-  color: white;
-  font-family: Arial, sans-serif;
+.card{
+  max-width:430px;margin:35px auto;
+  padding:25px;background:#151d33;
+  border:1px solid #293655;border-radius:22px;
+  box-shadow:0 12px 35px #0005;
 }
-
-header {
-  background: #111c32;
-  text-align: center;
-  padding: 22px;
-  border-bottom: 2px solid #00e5a0;
+.logo{text-align:center;font-size:32px;font-weight:bold;color:#58e0a0}
+.sub{text-align:center;color:#b8c3d9;margin:8px 0 25px}
+h2{text-align:center}
+input{
+  width:100%;padding:14px;margin:8px 0;
+  border-radius:10px;border:1px solid #405071;
+  background:#0b1020;color:white;font-size:16px;
 }
-
-header h1 {
-  color: #00e5a0;
-  margin: 0;
-  font-size: 32px;
+button{
+  width:100%;padding:14px;margin-top:10px;
+  border:0;border-radius:10px;background:#45d99b;
+  color:#07150e;font-weight:bold;font-size:16px;
 }
-
-header p {
-  color: #aebbd0;
+button:disabled{opacity:.5}
+.secondary{background:#293655;color:white}
+.note{font-size:12px;color:#aab6cc;line-height:1.5;margin-top:18px}
+#dashboard,#otpArea{display:none}
+.coin{
+  text-align:center;font-size:25px;padding:22px;
+  background:#0b1020;border-radius:14px;margin:18px 0;
 }
-
-main {
-  max-width: 480px;
-  margin: auto;
-  padding: 16px;
-}
-
-.card {
-  background: #121d33;
-  border: 1px solid #263653;
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 16px;
-}
-
-h2 {
-  font-size: 20px;
-}
-
-.muted {
-  color: #aebbd0;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-input {
-  width: 100%;
-  padding: 13px;
-  margin: 8px 0;
-  border-radius: 9px;
-  border: 1px solid #344563;
-  background: #080d1a;
-  color: white;
-  font-size: 16px;
-}
-
-button {
-  width: 100%;
-  padding: 13px;
-  margin-top: 8px;
-  border: none;
-  border-radius: 9px;
-  background: #00e5a0;
-  color: #06180f;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.secondary {
-  background: #263653;
-  color: white;
-}
-
-.coins {
-  font-size: 44px;
-  color: #00e5a0;
-  font-weight: bold;
-  text-align: center;
-}
-
-.balance {
-  text-align: center;
-}
-
-.page {
-  display: none;
-}
-
-.page.active {
-  display: block;
-}
-
-.notice {
-  color: #ffd166;
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.stat {
-  background: #1b2942;
-  padding: 16px;
-  border-radius: 12px;
-  text-align: center;
-}
-
-.stat strong {
-  display: block;
-  color: #00e5a0;
-  font-size: 24px;
-  margin-bottom: 6px;
-}
-
-nav {
-  position: sticky;
-  bottom: 0;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  background: #111c32;
-  padding: 8px 4px;
-  gap: 3px;
-}
-
-nav button {
-  background: transparent;
-  color: white;
-  font-size: 12px;
-  padding: 10px 2px;
-  margin: 0;
-}
-
-footer {
-  text-align: center;
-  color: #8290a8;
-  padding: 20px;
-  font-size: 12px;
-}
+#message{font-size:14px;line-height:1.5;color:#ffcf80}
 </style>
 </head>
-
 <body>
 
-<header>
-  <h1>⚡ SK EARN</h1>
-  <p>कमवा • बक्षिसे • प्रगती</p>
-</header>
+<section class="card" id="loginCard">
+  <div class="logo">💚 SK EARN</div>
+  <div class="sub">Secure mobile login</div>
 
-<main>
+  <h2>Welcome!</h2>
+  <p>तुझा मोबाइल नंबर टाकून लॉगिन कर.</p>
 
-<section id="loginPage" class="card">
-  <h2>📱 SK EARN मध्ये स्वागत!</h2>
-
-  <p class="muted">
-    आपला मोबाइल नंबर टाका.
-    ही डेमो लॉगिन स्क्रीन आहे.
-  </p>
-
-  <label for="phone">मोबाइल नंबर</label>
-  <input
-    id="phone"
-    type="tel"
-    placeholder="+91XXXXXXXXXX"
+  <input id="phone" type="tel"
+    placeholder="+91 9876543210"
     autocomplete="tel"
-  >
+    maxlength="16">
 
-  <button onclick="demoLogin()">Login करा</button>
+  <div id="recaptcha-container"></div>
 
-  <p id="loginMessage" class="notice"></p>
-</section>
+  <button id="sendBtn" onclick="sendOTP()">Send OTP</button>
 
-<section id="dashboard" class="page">
-
-  <div class="card balance">
-    <h2>💰 तुमचे Coins</h2>
-
-    <div class="coins" id="coins">0</div>
-
-    <p class="muted">
-      डेमो बॅलन्स: ₹0
-    </p>
+  <div id="otpArea">
+    <input id="otp" type="text" inputmode="numeric"
+      placeholder="6-digit OTP" maxlength="6"
+      autocomplete="one-time-code">
+    <button id="verifyBtn" onclick="verifyOTP()">Verify OTP & Login</button>
+    <button class="secondary" onclick="resetLogin()">Back</button>
   </div>
 
-  <div class="grid">
-    <div class="stat">
-      <strong id="totalEarned">0</strong>
-      <span class="muted">एकूण Coins</span>
-    </div>
-
-    <div class="stat">
-      <strong id="taskCount">0</strong>
-      <span class="muted">पूर्ण Tasks</span>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>🎯 Rewards</h2>
-
-    <p class="muted">
-      येथे पुढे Tasks आणि Rewards ची सुविधा जोडता येईल.
-    </p>
-
-    <button onclick="showPage('tasks')">
-      Tasks पहा
-    </button>
-  </div>
-
-</section>
-
-<section id="tasks" class="page">
-  <div class="card">
-    <h2>🎯 Tasks</h2>
-
-    <p class="muted">
-      Tasks आणि Rewards अजून जोडलेले नाहीत.
-    </p>
-
-    <p class="notice">
-      ही डेमो वेबसाइट आहे. येथे प्रत्यक्ष Coins मिळत नाहीत.
-    </p>
+  <p id="message" role="status"></p>
+  <div class="note">
+    Firebase फोन पडताळणी वापरली जाते. OTP कोणालाही सांगू नकोस.
+    SK EARN च्या या आवृत्तीत प्रत्यक्ष कमाई किंवा पैसे काढण्याची
+    सुविधा जोडलेली नाही.
   </div>
 </section>
 
-<section id="withdraw" class="page">
-  <div class="card">
-    <h2>🏦 पैसे काढा</h2>
+<section class="card" id="dashboard">
+  <div class="logo">SK EARN</div>
+  <h2>लॉगिन यशस्वी! 🎉</h2>
+  <p id="userPhone" style="text-align:center"></p>
 
-    <p class="muted">
-      ही फक्त डेमो स्क्रीन आहे.
-      कोणतेही पेमेंट केले जात नाही.
-    </p>
-
-    <label for="upi">UPI ID</label>
-    <input
-      id="upi"
-      type="text"
-      placeholder="example@upi"
-      autocomplete="off"
-    >
-
-    <button onclick="demoWithdraw()">
-      Withdraw Request
-    </button>
-
-    <p id="withdrawMessage" class="notice"></p>
+  <div class="coin">
+    🪙 <span id="coins">0</span> Demo Coins
   </div>
-</section>
 
-<section id="profile" class="page">
-  <div class="card">
-    <h2>👤 माझे प्रोफाइल</h2>
-
-    <p id="profilePhone" class="muted">
-      लॉगिन केलेले नाही
-    </p>
-
-    <p class="muted">Account: Demo</p>
-
-    <button class="secondary" onclick="logout()">
-      Logout
-    </button>
-  </div>
-</section>
-
-<div class="card">
-  <h2>🔐 महत्त्वाची माहिती</h2>
-
-  <p class="muted">
-    ही SK EARN ची फ्रंटएंड डेमो वेबसाइट आहे.
-    Firebase OTP, सुरक्षित Backend, जाहिराती
-    आणि प्रत्यक्ष पेमेंट अजून जोडलेले नाही.
+  <p style="text-align:center">
+    हे फक्त डेमो कॉइन्स आहेत; त्यांना रोख मूल्य नाही.
   </p>
-</div>
+  <button class="secondary" onclick="logout()">Logout</button>
+</section>
 
-</main>
+<script type="module">
+import { initializeApp } from
+  "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 
-<nav>
-  <button onclick="showPage('dashboard')">
-    🏠<br>Home
-  </button>
+import {
+  getAuth,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-  <button onclick="showPage('tasks')">
-    🎯<br>Tasks
-  </button>
+/* Firebase Console मधील Web App config इथे भरा.
+   Service account JSON किंवा private_key इथे टाकू नका. */
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "sk-earn-9d241.firebaseapp.com",
+  projectId: "sk-earn-9d241",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
 
-  <button onclick="showPage('withdraw')">
-    💸<br>Withdraw
-  </button>
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+auth.useDeviceLanguage();
 
-  <button onclick="showPage('profile')">
-    👤<br>Profile
-  </button>
-</nav>
+let confirmationResult = null;
+let verifier = null;
+let busy = false;
 
-<footer>
-  © 2026 SK EARN
-</footer>
+const message = document.getElementById("message");
+const sendBtn = document.getElementById("sendBtn");
+const verifyBtn = document.getElementById("verifyBtn");
 
-<script>
-let signedIn = false;
+function showMessage(text) {
+  message.textContent = text;
+}
 
-function demoLogin() {
+function setupRecaptcha() {
+  if (verifier) return;
+  verifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+    size: "normal",
+    callback: () => showMessage("reCAPTCHA पूर्ण झाले."),
+    "expired-callback": () => {
+      showMessage("reCAPTCHA कालबाह्य झाले. पुन्हा पूर्ण कर.");
+    }
+  });
+}
+
+window.sendOTP = async function () {
+  if (busy) return;
+
   const phone = document.getElementById("phone").value.trim();
-  const msg = document.getElementById("loginMessage");
 
   if (!/^\+[1-9]\d{7,14}$/.test(phone)) {
-    msg.textContent =
-      "कृपया +91XXXXXXXXXX या स्वरूपात नंबर लिहा.";
+    showMessage("पूर्ण नंबर देशाच्या कोडसह टाक. उदाहरण: +919876543210");
     return;
   }
 
-  signedIn = true;
+  busy = true;
+  sendBtn.disabled = true;
 
-  document.getElementById("profilePhone").textContent = phone;
-  document.getElementById("loginPage").style.display = "none";
+  try {
+    setupRecaptcha();
+    await verifier.render();
 
-  alert("हा Demo आहे. प्रत्यक्ष OTP पाठवलेला नाही.");
+    confirmationResult = await signInWithPhoneNumber(
+      auth, phone, verifier
+    );
 
-  showPage("dashboard");
-}
+    document.getElementById("otpArea").style.display = "block";
+    showMessage("OTP पाठवला आहे. SMS तपास.");
+  } catch (error) {
+    showMessage("OTP पाठवता आला नाही: " + error.message);
+    if (verifier) {
+      try { await verifier.clear(); } catch (_) {}
+      verifier = null;
+    }
+  } finally {
+    busy = false;
+    sendBtn.disabled = false;
+  }
+};
 
-function showPage(id) {
-  if (!signedIn) {
-    document.getElementById("loginPage").style.display = "block";
-    document.getElementById("loginMessage").textContent =
-      "आधी Demo Login करा.";
+window.verifyOTP = async function () {
+  if (busy || !confirmationResult) {
+    showMessage("आधी OTP पाठव.");
     return;
   }
 
-  document.querySelectorAll(".page").forEach(function(page) {
-    page.classList.remove("active");
-  });
+  const code = document.getElementById("otp").value.trim();
 
-  document.getElementById(id).classList.add("active");
-}
+  if (!/^\d{6}$/.test(code)) {
+    showMessage("6 अंकी OTP टाक.");
+    return;
+  }
 
-function demoWithdraw() {
-  document.getElementById("withdrawMessage").textContent =
-    "Demo: कोणतेही पेमेंट किंवा विनंती पाठवलेली नाही.";
-}
+  busy = true;
+  verifyBtn.disabled = true;
 
-function logout() {
-  signedIn = false;
+  try {
+    await confirmationResult.confirm(code);
+    showMessage("लॉगिन यशस्वी!");
+  } catch (error) {
+    showMessage("OTP पडताळणी अयशस्वी: " + error.message);
+  } finally {
+    busy = false;
+    verifyBtn.disabled = false;
+  }
+};
 
-  document.querySelectorAll(".page").forEach(function(page) {
-    page.classList.remove("active");
-  });
+window.resetLogin = function () {
+  confirmationResult = null;
+  document.getElementById("otp").value = "";
+  document.getElementById("otpArea").style.display = "none";
+  showMessage("तू पुन्हा नंबर टाकू शकतोस.");
+};
 
-  document.getElementById("loginPage").style.display = "block";
-  document.getElementById("phone").value = "";
-  document.getElementById("profilePhone").textContent =
-    "लॉगिन केलेले नाही";
-  document.getElementById("loginMessage").textContent = "";
-}
+window.logout = async function () {
+  await signOut(auth);
+};
+
+onAuthStateChanged(auth, user => {
+  const loggedIn = Boolean(user);
+
+  document.getElementById("loginCard").style.display =
+    loggedIn ? "none" : "block";
+
+  document.getElementById("dashboard").style.display =
+    loggedIn ? "block" : "none";
+
+  if (user) {
+    document.getElementById("userPhone").textContent =
+      "लॉगिन नंबर: " + (user.phoneNumber || "");
+
+    document.getElementById("coins").textContent = "0";
+  }
+});
 </script>
-
 </body>
-    </html>
+</html>
