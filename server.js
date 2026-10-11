@@ -31,12 +31,7 @@ function message(id, text) {
   $(id).textContent = text;
 }
 
-async function api(path, options = {}) {
-  const user = auth.currentUser;
-
-  if (!user) {
-    throw new Error("आधी login कर.");
-  }
+async function api(path, options = {}) 
 
   const token = await user.getIdToken();
 
