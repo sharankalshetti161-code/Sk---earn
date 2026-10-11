@@ -1,262 +1,174 @@
 
+import { initializeApp } from
+  "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 
-const express = require("express");
-const cors = require("cors");
-const admin = require("firebase-admin");
+import {
+  getAuth,
+  RecaptchaVerifier,
+  signInWithPhoneNumber
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-const app = express();
-app.use(express.json());
+// Firebase Console मधील तुझी खरी config इथे भर.
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "sk-earn-9d241.firebaseapp.com",
+  projectId: "sk-earn-9d241",
+  appId: "YOUR_APP_ID"
+};
 
-const allowedOrigins = (
-  process.env.ALLOWED_ORIGINS ||
-  "https://sharankalshetti161-code.github.io"
-).split(",").map(x => x.trim());
+// Render backend
+const API_URL = "https://sk-earn.onrender.com";
 
-app.use(cors({
-  origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      return callback(null, true);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+let confirmationResult = null;
+let recaptchaVerifier = null;
+
+const $ = id => document.getElementById(id);
+
+function message(id, text) {
+  $(id).textContent = text;
+}
+
+async function api(path, options = {}) {
+  const user = auth.currentUser;
+
+  if (!user) {
+    throw new Error("आधी login कर.");
+  }
+
+  const token = await user.getIdToken();
+
+  const response = await fetch(API_URL + path, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token,
+      ...(options.headers || {})
     }
-    return callback(new Error("Origin not allowed"));
-  }
-}));
-
-let db = null;
-
-try {
-  if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
-    throw new Error("Firebase service account is missing");
-  }
-
-  const serviceAccount = JSON.parse(
-    process.env.FIREBASE_SERVICE_ACCOUNT
-  );
-
-  if (!admin.apps.length) {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
-    });
-  }
-
-  db = admin.firestore();
-  console.log("Firebase connected");
-} catch (error) {
-  console.error("Firebase setup error:", error.message);
-}
-
-function checkFirebase(req, res, next) {
-  if (!db) {
-    return res.status(503).json({
-      error: "Firebase is not configured"
-    });
-  }
-  next();
-}
-
-async function checkLogin(req, res, next) {
-  try {
-    const header = req.headers.authorization || "";
-    const token = header.match(/^Bearer (.+)$/i);
-
-    if (!token) {
-      return res.status(401).json({
-        error: "Please sign in first"
-      });
-    }
-
-    req.user = await admin.auth().verifyIdToken(token[1]);
-    next();
-  } catch {
-    return res.status(401).json({
-      error: "Invalid or expired login"
-    });
-  }
-}
-
-const admins = new Set(
-  (process.env.ADMIN_UIDS || "")
-    .split(",").map(x => x.trim()).filter(Boolean)
-);
-
-function checkAdmin(req, res, next) {
-  if (!admins.has(req.user.uid)) {
-    return res.status(403).json({
-      error: "Admin access required"
-    });
-  }
-  next();
-}
-
-app.get("/", (req, res) => {
-  res.json({
-    app: "SK EARN",
-    status: "Backend running",
-    firebaseReady: !!db
   });
-});
 
-app.get("/health", (req, res) => {
-  res.json({ status: "OK", firebaseReady: !!db });
-});
+  const data = await response.json();
 
-// Create a wallet with zero balance. Users cannot set their own balance.
-app.post("/api/account", checkFirebase, checkLogin, async (req, res) => {
+  if (!response.ok) {
+    throw new Error(data.error || "Request failed");
+  }
+
+  return data;
+}
+
+$("sendOtp").addEventListener("click", async () => {
   try {
-    const ref = db.collection("users").doc(req.user.uid);
+    const phone = $("phone").value.trim();
 
-    await db.runTransaction(async tx => {
-      const snap = await tx.get(ref);
+    if (!/^\+[1-9]\d{7,14}$/.test(phone)) {
+      throw new Error("Number +91XXXXXXXXXX अशा format मध्ये टाक.");
+    }
 
-      if (!snap.exists) {
-        tx.set(ref, {
-          uid: req.user.uid,
-          phoneNumber: req.user.phone_number || null,
-          balancePaise: 0,
-          createdAt: admin.firestore.FieldValue.serverTimestamp()
-        });
-      }
+    $("sendOtp").disabled = true;
+
+    if (!recaptchaVerifier) {
+      recaptchaVerifier = new RecaptchaVerifier(
+        auth,
+        "recaptcha-container",
+        { size: "normal" }
+      );
+
+      await recaptchaVerifier.render();
+    }
+
+    confirmationResult = await signInWithPhoneNumber(
+      auth,
+      phone,
+      recaptchaVerifier
+    );
+
+    message("loginStatus", "OTP पाठवला. SMS तपास.");
+  } catch (error) {
+    message("loginStatus", error.message);
+  } finally {
+    $("sendOtp").disabled = false;
+  }
+});
+
+$("verifyOtp").addEventListener("click", async () => {
+  try {
+    if (!confirmationResult) {
+      throw new Error("आधी Send OTP कर.");
+    }
+
+    const code = $("otp").value.trim();
+
+    if (!/^\d{6}$/.test(code)) {
+      throw new Error("6 digit OTP टाक.");
+    }
+
+    await confirmationResult.confirm(code);
+    message("loginStatus", "Login successful!");
+    await refreshWallet();
+  } catch (error) {
+    message("loginStatus", error.message);
+  }
+});
+
+async function refreshWallet() {
+  try {
+    const data = await api("/wallet");
+    $("balance").textContent =
+      "₹" + Number(data.balance || 0).toFixed(2);
+  } catch (error) {
+    message("loginStatus", error.message);
+  }
+}
+
+$("refreshWallet").addEventListener("click", refreshWallet);
+
+$("withdraw").addEventListener("click", async () => {
+  try {
+    const amount = Number($("amount").value);
+    const upiId = $("upi").value.trim();
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      throw new Error("योग्य amount टाक.");
+    }
+
+    if (!upiId || !upiId.includes("@")) {
+      throw new Error("योग्य UPI ID टाक.");
+    }
+
+    const result = await api("/withdraw", {
+      method: "POST",
+      body: JSON.stringify({ amount, upiId })
     });
 
-    const snap = await ref.get();
+    message("withdrawStatus", result.message);
+    await refreshWallet();
+  } catch (error) {
+    message("withdrawStatus", error.message);
+  }
+});
 
-    res.json({
-      balancePaise: snap.get("balancePaise") || 0,
-      currency: "INR"
+$("loadTransactions").addEventListener("click", async () => {
+  try {
+    const data = await api("/transactions");
+    const list = $("transactions");
+    list.replaceChildren();
+
+    if (!data.transactions.length) {
+      const item = document.createElement("li");
+      item.textContent = "Transactions नाहीत.";
+      list.appendChild(item);
+      return;
+    }
+
+    data.transactions.forEach(transaction => {
+      const item = document.createElement("li");
+      item.textContent =
+        `${transaction.type || "Transaction"} — ₹${transaction.amount ?? 0} — ${transaction.status || "recorded"}`;
+      list.appendChild(item);
     });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ error: "Could not create account" });
+    message("loginStatus", error.message);
   }
-});
-
-// Read wallet
-app.get("/api/wallet", checkFirebase, checkLogin, async (req, res) => {
-  try {
-    const snap = await db.collection("users").doc(req.user.uid).get();
-
-    if (!snap.exists) {
-      return res.status(404).json({ error: "Create account first" });
-    }
-
-    res.json({
-      balancePaise: snap.get("balancePaise") || 0,
-      currency: "INR"
-    });
-  } catch {
-    res.status(500).json({ error: "Could not load wallet" });
-  }
-});
-
-// Read transaction history
-app.get("/api/transactions", checkFirebase, checkLogin, async (req, res) => {
-  try {
-    const snap = await db.collection("transactions")
-      .where("uid", "==", req.user.uid)
-      .limit(50).get();
-
-    res.json({
-      transactions: snap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }))
-    });
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ error: "Could not load transactions" });
-  }
-});
-
-// Submit withdrawal request. This does not send money automatically.
-app.post("/api/withdrawals", checkFirebase, checkLogin, async (req, res) => {
-  const amountPaise = req.body.amountPaise;
-  const upiId = String(req.body.upiId || "").trim();
-
-  if (!Number.isSafeInteger(amountPaise) ||
-      amountPaise < 10000 || amountPaise > 100000000) {
-    return res.status(400).json({
-      error: "Withdrawal minimum is ₹100"
-    });
-  }
-
-  if (!/^[\w.-]+@[\w.-]+$/.test(upiId)) {
-    return res.status(400).json({ error: "Invalid UPI ID" });
-  }
-
-  try {
-    const userRef = db.collection("users").doc(req.user.uid);
-    const withdrawalRef = db.collection("withdrawals").doc();
-    const transactionRef = db.collection("transactions").doc();
-
-    await db.runTransaction(async tx => {
-      const user = await tx.get(userRef);
-
-      if (!user.exists) throw new Error("NO_ACCOUNT");
-
-      const balance = user.get("balancePaise") || 0;
-
-      if (balance < amountPaise) throw new Error("LOW_BALANCE");
-
-      tx.update(userRef, {
-        balancePaise: balance - amountPaise
-      });
-
-      tx.set(withdrawalRef, {
-        uid: req.user.uid,
-        amountPaise,
-        upiId,
-        status: "pending",
-        createdAt: admin.firestore.FieldValue.serverTimestamp()
-      });
-
-      tx.set(transactionRef, {
-        uid: req.user.uid,
-        type: "withdrawal",
-        amountPaise: -amountPaise,
-        status: "pending",
-        withdrawalId: withdrawalRef.id,
-        createdAt: admin.firestore.FieldValue.serverTimestamp()
-      });
-    });
-
-    res.status(201).json({
-      message: "Withdrawal request submitted",
-      withdrawalId: withdrawalRef.id,
-      status: "pending"
-    });
-  } catch (error) {
-    if (error.message === "NO_ACCOUNT") {
-      return res.status(404).json({ error: "Create account first" });
-    }
-    if (error.message === "LOW_BALANCE") {
-      return res.status(400).json({ error: "Insufficient balance" });
-    }
-
-    console.error(error.message);
-    res.status(500).json({ error: "Withdrawal request failed" });
-  }
-});
-
-// Admin: view pending withdrawals
-app.get("/api/admin/withdrawals",
-  checkFirebase, checkLogin, checkAdmin,
-  async (req, res) => {
-    try {
-      const snap = await db.collection("withdrawals")
-        .where("status", "==", "pending")
-        .limit(100).get();
-
-      res.json({
-        withdrawals: snap.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }))
-      });
-    } catch {
-      res.status(500).json({ error: "Could not load requests" });
-    }
-  }
-);
-
-app.listen(process.env.PORT || 3000, "0.0.0.0", () => {
-  console.log("SK EARN backend started");
 });
