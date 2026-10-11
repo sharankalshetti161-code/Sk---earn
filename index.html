@@ -2,242 +2,55 @@
 <!DOCTYPE html>
 <html lang="mr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SK EARN</title>
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#0b1020;color:#fff;font-family:Arial,sans-serif}
-header{text-align:center;padding:22px;background:#151d33}
-header h1{margin:0;color:#42e8a0}
-main{max-width:500px;margin:auto;padding:15px}
-.card{background:#151d33;border:1px solid #283451;border-radius:15px;padding:18px;margin:15px 0}
-h2{font-size:19px}
-input,button{width:100%;padding:13px;margin:7px 0;border-radius:9px;font-size:15px}
-input{background:#0b1020;color:white;border:1px solid #34415e}
-button{background:#42e8a0;color:#07130e;border:0;font-weight:bold}
-.secondary{background:#283451;color:white}
-.balance{font-size:34px;color:#42e8a0;font-weight:bold}
-.small{font-size:12px;color:#b8c3d9;line-height:1.6}
-.hidden{display:none}
-.item{padding:12px 0;border-bottom:1px solid #34415e;overflow-wrap:anywhere}
-#message{color:#ffd479;white-space:pre-wrap}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SK EARN</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-<h1>⚡ SK EARN</h1>
-<p>Earn • Wallet • Transactions</p>
-</header>
+  <header>
+    <h1>💰 SK EARN</h1>
+    <p>Earn • Learn • Track</p>
+  </header>
 
-<main>
-<div id="message"></div>
+  <main>
+    <section class="card">
+      <h2>📱 Phone Login</h2>
+      <input id="phone" type="tel" placeholder="+91 Mobile Number">
+      <div id="recaptcha-container"></div>
+      <button id="sendOtp">Send OTP</button>
 
-<section id="login" class="card">
-<h2>📱 Login / Register</h2>
-<input id="phone" type="tel" placeholder="+91XXXXXXXXXX">
-<div id="recaptcha-container"></div>
-<button id="sendOtp">Send OTP</button>
-<input id="otp" inputmode="numeric" placeholder="Enter OTP">
-<button id="verifyOtp">Verify OTP & Login</button>
-<p class="small">OTP साठी Firebase Phone Authentication सुरू असणे आवश्यक आहे.</p>
-</section>
+      <input id="otp" type="text" inputmode="numeric"
+        placeholder="Enter OTP" maxlength="6">
+      <button id="verifyOtp">Verify OTP</button>
+      <p id="loginStatus">Login करण्यासाठी मोबाइल नंबर टाका.</p>
+    </section>
 
-<section id="dashboard" class="hidden">
-<div class="card">
-<h2>👤 My Profile</h2>
-<div id="userPhone"></div>
-<button id="logout" class="secondary">Logout</button>
-</div>
+    <section class="card">
+      <h2>👛 My Wallet</h2>
+      <p>Available balance</p>
+      <h1 id="balance">₹0.00</h1>
+      <button id="refreshWallet">Refresh Wallet</button>
+    </section>
 
-<div class="card">
-<h2>💰 My Wallet</h2>
-<div class="balance" id="balance">₹0.00</div>
-<button id="refresh" class="secondary">Refresh Balance</button>
-</div>
+    <section class="card">
+      <h2>🏦 UPI Withdrawal</h2>
+      <input id="amount" type="number" min="1"
+        placeholder="Amount in ₹">
+      <input id="upi" type="text" placeholder="Your UPI ID">
+      <button id="withdraw">Request Withdrawal</button>
+      <p id="withdrawStatus"></p>
+    </section>
 
-<div class="card">
-<h2>🏦 Withdraw Money</h2>
-<input id="amount" type="number" min="1" step="0.01" placeholder="Amount in ₹">
-<input id="upi" placeholder="Your UPI ID">
-<button id="withdraw">Submit Withdrawal Request</button>
-<p class="small">ही request आहे; पैसे आपोआप पाठवले जात नाहीत.</p>
-</div>
+    <section class="card">
+      <h2>📜 Transactions</h2>
+      <button id="loadTransactions">Load History</button>
+      <ul id="transactions"></ul>
+    </section>
+  </main>
 
-<div class="card">
-<h2>📜 Transaction History</h2>
-<button id="loadTransactions" class="secondary">Refresh History</button>
-<div id="transactions">No transactions loaded.</div>
-</div>
-</section>
+  <footer>SK EARN © 2026</footer>
 
-<p class="small">⚠️ Wallet balance फक्त backend कडून मिळतो. खरे पैसे जमा करण्यासाठी सुरक्षित earning आणि payment system आवश्यक आहे.</p>
-</main>
-
-<script type="module">
-import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
- getAuth, RecaptchaVerifier, signInWithPhoneNumber,
- onAuthStateChanged, signOut
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-const firebaseConfig = {
- apiKey: "PASTE_YOUR_FIREBASE_API_KEY",
- authDomain: "sk-earn-9d241.firebaseapp.com",
- projectId: "sk-earn-9d241",
- storageBucket: "sk-earn-9d241.firebasestorage.app",
- messagingSenderId: "PASTE_YOUR_MESSAGING_SENDER_ID",
- appId: "PASTE_YOUR_FIREBASE_APP_ID"
-};
-
-const API = "https://sk-earn.onrender.com";
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const $ = id => document.getElementById(id);
-
-let confirmation = null;
-let recaptcha = null;
-
-function showMessage(text){
- $("message").textContent = text;
-}
-
-async function api(path, options={}){
- const user = auth.currentUser;
- if(!user) throw new Error("Please login first.");
-
- const token = await user.getIdToken();
- const response = await fetch(API + path,{
-  ...options,
-  headers:{
-   "Content-Type":"application/json",
-   "Authorization":"Bearer " + token,
-   ...(options.headers || {})
-  }
- });
-
- const data = await response.json().catch(()=>({}));
- if(!response.ok) throw new Error(data.error || data.message || "Request failed");
- return data;
-}
-
-$("sendOtp").onclick = async ()=>{
- try{
-  showMessage("Sending OTP...");
-  if(!recaptcha){
-   recaptcha = new RecaptchaVerifier(auth,"recaptcha-container",{});
-  }
-  confirmation = await signInWithPhoneNumber(
-   auth,$("phone").value.trim(),recaptcha
-  );
-  showMessage("OTP sent. Enter the OTP.");
- }catch(e){
-  showMessage("OTP Error: " + e.message);
-  if(recaptcha){
-   try{recaptcha.clear()}catch{}
-   recaptcha=null;
-   $("recaptcha-container").innerHTML="";
-  }
- }
-};
-
-$("verifyOtp").onclick = async ()=>{
- try{
-  if(!confirmation) throw new Error("First tap Send OTP.");
-  await confirmation.confirm($("otp").value.trim());
-  showMessage("Login successful!");
- }catch(e){
-  showMessage("Verification Error: " + e.message);
- }
-};
-
-onAuthStateChanged(auth,async user=>{
- $("login").classList.toggle("hidden",!!user);
- $("dashboard").classList.toggle("hidden",!user);
-
- if(!user) return;
-
- $("userPhone").textContent = user.phoneNumber || "Verified user";
-
- try{
-  await api("/api/account",{method:"POST",body:"{}"});
-  await refreshWallet();
- }catch(e){
-  showMessage("Backend Error: " + e.message);
- }
-});
-
-async function refreshWallet(){
- const data = await api("/api/wallet");
- const paise = Number(data.balancePaise ?? 0);
- $("balance").textContent = "₹" + (paise/100).toFixed(2);
-}
-
-$("refresh").onclick = async ()=>{
- try{
-  await refreshWallet();
-  showMessage("Wallet updated.");
- }catch(e){showMessage(e.message)}
-};
-
-$("loadTransactions").onclick = async ()=>{
- try{
-  const data = await api("/api/transactions");
-  const items = data.transactions || [];
-  const box = $("transactions");
-  box.replaceChildren();
-
-  if(items.length===0){
-   box.textContent="No transactions yet.";
-   return;
-  }
-
-  items.forEach(t=>{
-   const div=document.createElement("div");
-   div.className="item";
-   div.textContent =
-    (t.type || "Transaction") + " • ₹" +
-    (Number(t.amountPaise || 0)/100).toFixed(2) +
-    " • " + (t.status || "Recorded");
-   box.appendChild(div);
-  });
- }catch(e){showMessage("History Error: " + e.message)}
-};
-
-$("withdraw").onclick = async ()=>{
- const amount=Number($("amount").value);
- const upiId=$("upi").value.trim();
-
- if(!Number.isFinite(amount)||amount<=0){
-  showMessage("Enter a valid amount.");
-  return;
- }
-
- if(!/^[\w.-]+@[\w.-]+$/.test(upiId)){
-  showMessage("Enter a valid UPI ID.");
-  return;
- }
-
- try{
-  const result=await api("/api/withdrawals",{
-   method:"POST",
-   body:JSON.stringify({
-    amountPaise:Math.round(amount*100),
-    upiId:upiId
-   })
-  });
-  showMessage(result.message || "Withdrawal request submitted.");
-  await refreshWallet();
-  await $("loadTransactions").onclick();
- }catch(e){
-  showMessage("Withdrawal Error: " + e.message);
- }
-};
-
-$("logout").onclick=async ()=>{
- await signOut(auth);
- showMessage("Logged out.");
-};
-</script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
