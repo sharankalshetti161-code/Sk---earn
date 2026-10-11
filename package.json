@@ -1,7 +1,8 @@
+
 {
   "name": "sk-earn-backend",
   "version": "1.0.0",
-  "description": "SK EARN backend",
+  "private": true,
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
