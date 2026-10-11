@@ -1,0 +1,98 @@
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0b1020;
+  color: #ffffff;
+}
+
+header {
+  text-align: center;
+  padding: 24px 12px;
+  background: #121b35;
+  border-bottom: 1px solid #293858;
+}
+
+header h1 {
+  color: #48e5a4;
+  margin: 0 0 8px;
+}
+
+header p {
+  color: #b7c3dc;
+  margin: 0;
+}
+
+main {
+  width: 100%;
+  max-width: 520px;
+  margin: auto;
+  padding: 14px;
+}
+
+.card {
+  background: #151e33;
+  border: 1px solid #293858;
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.card h2 {
+  font-size: 19px;
+  margin-top: 0;
+}
+
+input {
+  width: 100%;
+  padding: 13px;
+  margin: 8px 0;
+  border: 1px solid #394766;
+  border-radius: 9px;
+  background: #0b1020;
+  color: white;
+  font-size: 16px;
+}
+
+button {
+  width: 100%;
+  padding: 13px;
+  margin: 7px 0;
+  border: 0;
+  border-radius: 9px;
+  background: #48e5a4;
+  color: #07150f;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+button:active {
+  opacity: 0.8;
+}
+
+#balance {
+  color: #48e5a4;
+  font-size: 32px;
+}
+
+#loginStatus,
+#withdrawStatus {
+  color: #c5d2e9;
+  overflow-wrap: anywhere;
+}
+
+li {
+  padding: 8px 0;
+  border-bottom: 1px solid #293858;
+  overflow-wrap: anywhere;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  color: #a8b3ca;
+}
