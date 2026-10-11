@@ -10,10 +10,10 @@ import {
 
 // Firebase Console मधील तुझी खरी config इथे भर.
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
+  apiKey: "AIzaSyBZdXYk8mDXsZ7lwqRdPAYOt3bDVvMay4Q",
   authDomain: "sk-earn-9d241.firebaseapp.com",
   projectId: "sk-earn-9d241",
-  appId: "YOUR_APP_ID"
+  appId: "1:613897902500:web:17554beea14bae744b8931"
 };
 
 // Render backend
